@@ -19,14 +19,20 @@ fi
 
 # prepare UserUI
 info "Setting up UserUI"
-UI="/sbin/tuxoniceui"
+UI=""
 UIOPTS=""
+
+if [ -e "/sbin/tuxoniceui" ]; then
+  UI="/sbin/tuxoniceui"
+elif [ -e "/sbin/tuxoniceui_text" ]; then
+  UI="/sbin/tuxoniceui_text"
+fi
 
 if [ -e "/sys/class/graphics/fb0/state" -a -e "/etc/splash/tuxonice/" ]; then
   UIOPTS="$UIOPTS -f"
 fi
 
-if [ -e "$UI" ]; then
+if [ -n "$UI" ]; then
   info "Using $UI with $UIOPTS"
   echo "$UI $UIOPTS" >/sys/power/tuxonice/user_interface/program
   echo 1 >/sys/power/tuxonice/user_interface/enabled
