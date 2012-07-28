@@ -14,7 +14,7 @@ elif [ "$2" = "swap" ]; then
 elif [ "$2" = "resume" ]; then
   echo "<3>Dracut: found resume parameter device in $1, trying to resume" > /dev/kmsg
   OLDDEV=$(cat /sys/power/tuxonice/resume)
-  resume="$resume_type:$resume_dev"
+  resume="$resume_type:$1"
   if [ -n $resume_file ]; then
     resume="$resume:$resume_file"
   fi
