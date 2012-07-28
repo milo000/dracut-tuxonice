@@ -2,8 +2,7 @@
 
 install() {
   # install userui
-  [ -x /sbin/tuxoniceui ] && inst tuxoniceui
-  [ -x /sbin/tuxoniceui_text ] && inst tuxoniceui_text
+  inst tuxoniceui || true
   
   # install splash graphics if exists
   my_inst_dir() {
