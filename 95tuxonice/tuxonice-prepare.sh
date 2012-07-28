@@ -43,9 +43,9 @@ fi
 
 # install udev rule for resume parameter
 if resume=$(getarg resume=) && ! getarg noresume; then
-  resume_type="$(echo $resume | cut -d':' -f1)"
-  resume_dev="$(echo $resume | cut -d':' -f2)"
-  resume_file="$(echo $resume | cut -d':' -f3)"
+  resume_type="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\1/')"
+  resume_dev="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\2/')"
+  resume_file="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\3/')"
   export resume_type
   export resume_dev
   export resume_file
