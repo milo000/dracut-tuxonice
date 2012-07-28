@@ -11,5 +11,15 @@ elif [ "$2" = "swap" ]; then
   echo "<3>Dracut: found swap signature in $1, using for ToI" > /dev/kmsg
   CURDEV=$(cat /sys/power/tuxonice/resume)
   [ -z "$CURDEV" ] && echo "swap:$1" >/sys/power/tuxonice/resume
+  echo "<3>Dracut: %k=$1 resume_file=$resume_file resume_type=$resume_type resume_dev=$resume_dev" > /dev/kmsg
+  OLDDEV=$(cat /sys/power/tuxonice/resume)
+  resume="$resume_type:$1"
+  if [ -n $resume_file ]; then
+    resume="$resume:$resume_file"
+  fi
+  echo "$resume" >/sys/power/tuxonice/resume
+  echo 1 >/sys/power/tuxonice/do_resume
+  echo "<3>Dracut: no resume operation occured, restoring old value ($OLDDEV)" >/dev/kmsg
+  echo "$OLDDEV" >/sys/power/tuxonice/resume
 fi
 
