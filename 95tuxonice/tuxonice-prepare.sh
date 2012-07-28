@@ -41,6 +41,42 @@ else
   echo 0 >/sys/power/tuxonice/user_interface/enabled
 fi
 
+# install udev rule for resume parameter
+if resume=$(getarg resume=) && ! getarg noresume; then
+  resume_type="$(echo $resume | awk -F':' '{print $1}')"
+  resume_dev="$(echo $resume | awk -F':' '{print $2}')"
+  resume_file="$(echo $resume | awk -F':' '{print $3}')"
+  export resume_type
+  export resume_dev
+  export resume_file
+else
+  unset resume
+fi
+
+info "Installing udev rule for resume parameter"
+case "$resume_dev" in
+  LABEL=*) \
+    resume_dev="$(echo $resume_dev | sed 's,/,\\x2f,g')"
+    {
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_FS_LABEL}==\"${resume_dev#LABEL=}\", " \
+         " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
+    } >> /etc/udev/rules.d/99-tuxonice.rules
+    ;;
+  UUID=*) \
+    {
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_FS_UUID}==\"${resume_dev#UUID=}\", " \
+         " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
+    } >> /etc/udev/rules.d/99-tuxonice.rules
+    ;;
+  PARTUUID=*) \
+    {
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_PART_ENTRY_UUID}==\"${resume_dev#PARTUUID=}\", " \
+         " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
+    } >> /etc/udev/rules.d/99-tuxonice.rules
+    ;;
+esac
+
+
 # install udev rule for resuming
 info "Installing udev rule for ToI resume"
 {
