@@ -43,34 +43,39 @@ fi
 
 # install udev rule for resume parameter
 if resume=$(getarg resume=) && ! getarg noresume; then
-  resume_type="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\1/')"
-  resume_dev="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\2/')"
-  resume_file="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\3/')"
-  export resume_type
-  export resume_dev
-  export resume_file
+  resume="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\2/')"
 else
   unset resume
 fi
 
 info "Installing udev rule for resume parameter"
-case "$resume_dev" in
+case "$resume" in
   LABEL=*) \
-    resume_dev="$(echo $resume_dev | sed 's,/,\\x2f,g')"
+    resume="$(echo $resume | sed 's,/,\\x2f,g')"
     {
-    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_FS_LABEL}==\"${resume_dev#LABEL=}\", " \
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_FS_LABEL}==\"${resume#LABEL=}\", " \
          " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
     } >> /etc/udev/rules.d/99-tuxonice.rules
     ;;
   UUID=*) \
     {
-    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_FS_UUID}==\"${resume_dev#UUID=}\", " \
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_FS_UUID}==\"${resume#UUID=}\", " \
          " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
     } >> /etc/udev/rules.d/99-tuxonice.rules
     ;;
   PARTUUID=*) \
     {
-    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_PART_ENTRY_UUID}==\"${resume_dev#PARTUUID=}\", " \
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", ENV{ID_PART_ENTRY_UUID}==\"${resume#PARTUUID=}\", " \
+         " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
+    } >> /etc/udev/rules.d/99-tuxonice.rules
+    ;;
+  *) \
+    {
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", SYMLINK==\"${resume#/dev/}\", " \
+         " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
+    } >> /etc/udev/rules.d/99-tuxonice.rules
+    {
+    echo "SUBSYSTEM==\"block\", ACTION==\"add|change\", KERNEL==\"${resume#/dev/}\", " \
          " RUN+=\"/sbin/tuxonice-resumecheck.sh '/dev/%k' 'resume'\"";
     } >> /etc/udev/rules.d/99-tuxonice.rules
     ;;
