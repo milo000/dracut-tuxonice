@@ -36,8 +36,8 @@ else
 fi
 
 # install udev rule for resume parameter
-if resume=$(getarg resume=) && ! getarg noresume; then
-  resume="$(echo $resume | sed 's/\([^:]*\):\([^:]*\):\([^:]*\)/\2/')"
+if resume=$(getarg resume=) && ! getarg noresume2; then
+  resume="$(echo $resume | sed 's/\([^:]*\):\([^:]*\).*/\2/')"
 else
   unset resume
 fi
